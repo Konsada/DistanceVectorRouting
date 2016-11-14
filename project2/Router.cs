@@ -15,8 +15,12 @@ namespace project2
         Socket m_update;
         Socket m_command;
         int m_infinity = 64;
-        public Dictionary<string, int> m_forwardingTable = new Dictionary<string, int>();  // router name and cost
+        // table to send packets to |Destination|Cost|NextHop|
+        public Dictionary<string, int> m_RoutingTable = new Dictionary<string, int>();
 
+        public Dictionary<string, int> m_Neighbors = new Dictionary<string, int>();
+
+        #region
         /// <summary>
         /// Creates a router object.
         /// </summary>
@@ -79,13 +83,15 @@ namespace project2
                 m_command.Bind(new IPEndPoint(Dns.GetHostAddresses(Host)[1], value));
             }
         }
-        public int UpdatePort {
+        public int UpdatePort
+        {
             set
             {
                 m_update.Bind(new IPEndPoint(Dns.GetHostAddresses(Host)[1], value));
             }
         }
         public bool Poisoned { get; set; }
+        #endregion
         public void Start()
         {
             IPHostEntry hostEntry = Dns.GetHostEntry(Host);
@@ -131,6 +137,7 @@ namespace project2
                             string msg = Encoding.ASCII.GetString(bytes, 0, read);
                             if (RouterChange(msg))
                             {
+                                ProcessMessage(msg);
                                 UpdateForwardTable();
                             }
                         }
@@ -150,9 +157,47 @@ namespace project2
             }
         }
 
+        private void ProcessMessage(string msg)
+        {
+            string[] parts = msg.Split(' ');
+            switch (parts[0])
+            {
+                case "U":
+                    UpdateRouter(parts);
+                    break;
+                case "L":
+                    LinkCost(parts);
+                    break;
+                default:
+                    Console.WriteLine("Cannot recognize update message command");
+                    break;
+            }
+        }
+
+        private void LinkCost(string[] parts)
+        {
+            // if link cost changed, then change the dictionary value
+            if (m_Neighbors[parts[1]] != int.Parse(parts[2]))
+            {
+                m_Neighbors[parts[1]] = int.Parse(parts[2]);
+            }
+                
+        }
+
+        private void UpdateRouter(string[] parts)
+        {
+            throw new NotImplementedException();
+        }
+
         private void ReadConfig()
         {
-            System.IO.File.ReadAllLines(Name + ".cfg");
+            string[] lines = System.IO.File.ReadAllLines(Directory + "/" + Name + ".cfg");
+
+            foreach (string line in lines)
+            {
+                string[] parts = line.Split(' ');
+                m_Neighbors.Add(parts[0], int.Parse(parts[1]));
+            }
         }
 
         private void UpdateForwardTable()

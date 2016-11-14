@@ -23,8 +23,7 @@ namespace project2
         {
             string dir, routerName;
             bool poisonReverse = false;
-            int cPort, uPort;
-            cPort = uPort = 0;
+
             if (args[1].Contains("-p"))
             {
                 poisonReverse = true;
@@ -45,7 +44,7 @@ namespace project2
 
         private static void LoadInfo(string dir, Router router)
         {
-            string[] lines = System.IO.File.ReadAllLines(dir + "routers");
+            string[] lines = System.IO.File.ReadAllLines(dir + "/" + "routers");
             string[] parts;
             int m_commandPartIndex = 2;
             int m_updatePartIndex = 3;
@@ -60,7 +59,7 @@ namespace project2
                 }
                 else
                 {
-                    router.m_forwardingTable.Add(parts[0], 64);
+                    router.m_RoutingTable.Add(parts[0], 64);
                 }
             }
         }
