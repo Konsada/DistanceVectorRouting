@@ -14,11 +14,13 @@ namespace project2
         UdpClient m_sender;
         Socket m_update;
         Socket m_command;
+        int m_commandPort;
+        int m_updatePort;
         int m_infinity = 64;
         // table to send packets to |Destination|Cost|NextHop|
         public Dictionary<string, Tuple<int, string>> m_RoutingTable = new Dictionary<string, Tuple<int, string>>();
-
-        public Dictionary<string, int> m_Neighbors = new Dictionary<string, int>();
+        // Dictionary that keeps track of its neighbors names and update port # <name,<cost, updatePort>>
+        public Dictionary<string, Tuple<int, int>> m_Neighbors = new Dictionary<string, Tuple<int,int>>();
         
         #region
         /// <summary>
@@ -33,6 +35,8 @@ namespace project2
         {
             Name = name;
             Host = host;
+            m_commandPort = cPort;
+            m_updatePort = uPort;
             CommandPort = cPort;
             UpdatePort = uPort;
             Poisoned = poison;
@@ -54,6 +58,8 @@ namespace project2
         {
             Name = name;
             Host = host.Address.ToString();
+            m_commandPort = cPort;
+            m_updatePort = uPort;
             CommandPort = cPort;
             UpdatePort = uPort;
             Poisoned = poison;
@@ -78,6 +84,10 @@ namespace project2
         public string Directory { get; set; }
         public int CommandPort
         {
+            get
+            {
+                return m_commandPort;
+            }
             set
             {
                 m_command.Bind(new IPEndPoint(Dns.GetHostAddresses(Host)[1], value));
@@ -85,6 +95,10 @@ namespace project2
         }
         public int UpdatePort
         {
+            get
+            {
+                return m_updatePort;
+            }
             set
             {
                 m_update.Bind(new IPEndPoint(Dns.GetHostAddresses(Host)[1], value));
@@ -96,8 +110,8 @@ namespace project2
         {
             IPHostEntry hostEntry = Dns.GetHostEntry(Host);
             IPAddress ipAddress = hostEntry.AddressList[1];
-            UdpClient neighborClient = new UdpClient(11000);
-            IPEndPoint sender = new IPEndPoint(IPAddress.Any, 11000);
+            UdpClient neighborClient = new UdpClient(UpdatePort);
+            IPEndPoint sender = new IPEndPoint(IPAddress.Any, UpdatePort);
             EndPoint neighborRouter = (EndPoint)sender;
 
             // Data buffer for incoming data.
@@ -119,10 +133,10 @@ namespace project2
 
                     // Start listening for connections.
                     updatePort = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                    updatePort.Bind(new IPEndPoint(ipAddress, 11000));
+                    updatePort.Bind(new IPEndPoint(ipAddress, UpdatePort));
 
                     commandPort = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                    commandPort.Bind(new IPEndPoint(ipAddress, 11001));
+                    commandPort.Bind(new IPEndPoint(ipAddress, CommandPort));
 
                     listenList.Add(updatePort);
                     listenList.Add(commandPort);
@@ -142,7 +156,6 @@ namespace project2
                             }
                         }
                     }
-
 
                     updatePort.Shutdown(SocketShutdown.Both);
                     updatePort.Close();
@@ -177,9 +190,9 @@ namespace project2
         private void LinkCost(string[] parts)
         {
             // if link cost changed, then change the dictionary value
-            if (m_Neighbors[parts[1]] != int.Parse(parts[2]))
+            if (m_Neighbors[parts[1]].Item1 != int.Parse(parts[2]))
             {
-                m_Neighbors[parts[1]] = int.Parse(parts[2]);
+                m_Neighbors[parts[1]] = new Tuple<int, int>(int.Parse(parts[2]), m_Neighbors[parts[1]].Item2);
             }
                 
         }
@@ -196,7 +209,7 @@ namespace project2
             foreach (string line in lines)
             {
                 string[] parts = line.Split(' ');
-                m_Neighbors.Add(parts[0], int.Parse(parts[1]));
+                m_Neighbors[parts[0]] = new Tuple<int, int>(int.Parse(parts[1]), m_Neighbors[parts[0]].Item2);
             }
         }
 
