@@ -4,3 +4,4 @@ C:\Users\keons_000\Documents\CS455\PROJECTS\project2\project2\bin\Debug\project2
 C:\Users\keons_000\Documents\CS455\PROJECTS\project2\project2\obj\Debug\project2.csprojResolveAssemblyReference.cache
 C:\Users\keons_000\Documents\CS455\PROJECTS\project2\project2\obj\Debug\project2.exe
 C:\Users\keons_000\Documents\CS455\PROJECTS\project2\project2\obj\Debug\project2.pdb
+C:\Users\Erik\Documents\GitRepos\DistanceVectorRouting\project2\bin\Debug\project2.exe.config

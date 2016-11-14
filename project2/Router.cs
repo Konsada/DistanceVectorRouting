@@ -16,10 +16,10 @@ namespace project2
         Socket m_command;
         int m_infinity = 64;
         // table to send packets to |Destination|Cost|NextHop|
-        public Dictionary<string, int> m_RoutingTable = new Dictionary<string, int>();
+        public Dictionary<string, Tuple<int, string>> m_RoutingTable = new Dictionary<string, Tuple<int, string>>();
 
         public Dictionary<string, int> m_Neighbors = new Dictionary<string, int>();
-
+        
         #region
         /// <summary>
         /// Creates a router object.
