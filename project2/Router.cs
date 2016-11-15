@@ -7,6 +7,11 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
+//Authors: Keon Sadatian (11169575) & Erik Lystad (11338869)
+//Course: CptS455
+//Instructor: Dr. Carl Hauser
+//Assignment: Project 2
+
 namespace project2
 {
     public class Router
@@ -184,7 +189,7 @@ namespace project2
                 m_RoutingTable[parts[1]] = new Tuple<int, string>((m_Neighbors[parts[1]].Item1 - int.Parse(parts[2])) + m_RoutingTable[parts[1]].Item1,
                     m_RoutingTable[parts[1]].Item2);
                 m_Neighbors[parts[1]] = new Tuple<int, int>(int.Parse(parts[2]), m_Neighbors[parts[1]].Item2);
-
+                Console.WriteLine(Name + " - dest: " + parts[0] + " cost: " + parts[1] + " nexthop: " + parts[0]);
             }
         }
         /// <summary>
@@ -213,6 +218,7 @@ namespace project2
                     m_RoutingTable.Remove(dest);
                     m_RoutingTable.Add(dest, new Tuple<int, string>(costToNeighbor + destCost, neighbor));
                     routingTableUpdated = true;
+                    Console.WriteLine(Name + " - dest: " + dest + " cost: " + (costToNeighbor + destCost).ToString() + " nexthop: " + neighbor);
                 }
             }
             if (routingTableUpdated)

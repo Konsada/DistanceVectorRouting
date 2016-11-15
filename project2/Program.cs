@@ -7,6 +7,11 @@ using System.Net;
 using System.Net.Sockets;
 using System.Collections;
 
+//Authors: Keon Sadatian (11169575) & Erik Lystad (11338869)
+//Course: CptS455
+//Instructor: Dr. Carl Hauser
+//Assignment: Project 2
+
 namespace project2
 {
     class Program
