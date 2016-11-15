@@ -208,6 +208,7 @@ namespace project2
                     m_RoutingTable.Remove(dest);
                     m_RoutingTable.Add(dest, new Tuple<int, string>(costToNeighbor + destCost, neighbor));
                     routingTableUpdated = true;
+                    Console.WriteLine(Name + " - dest: " + dest + " cost: " + (costToNeighbor + destCost).ToString() + " nexthop: " + neighbor);
                 }
             }
             if (routingTableUpdated)
