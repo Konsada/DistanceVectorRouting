@@ -172,7 +172,7 @@ namespace project2
 
         private void ProcessMessage(string msg)
         {
-            string[] parts = msg.Split(' ');
+            string[] parts = msg.Trim().Split(' ');
             switch (parts[0])
             {
                 case "U":
@@ -180,6 +180,9 @@ namespace project2
                     break;
                 case "L":
                     LinkCost(parts);
+                    break;
+                case "P":
+                    HandlePMessage(parts);
                     break;
                 default:
                     Console.WriteLine("Cannot recognize update message command");
@@ -229,6 +232,26 @@ namespace project2
             m_command.Shutdown(SocketShutdown.Both);
             m_update.Close();
             m_command.Close();
+        }
+
+        private void HandlePMessage(string[] pieces)
+        {
+            if (pieces.Length < 2)
+            {
+                Console.WriteLine("Not enough arguments were given");
+            }
+            if (m_RoutingTable.ContainsKey(pieces[1]))
+            {
+                Console.Write(pieces[0]);
+                Console.Write(" ");
+                Console.Write(m_RoutingTable[pieces[1]].Item1.ToString());
+                Console.Write(" ");
+                Console.WriteLine(m_RoutingTable[pieces[1]].Item2.ToString());
+            }
+            else
+            {
+                Console.WriteLine(pieces[0] + " was not found in the current routing table");
+            }
         }
     }
 }
