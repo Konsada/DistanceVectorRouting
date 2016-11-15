@@ -15,10 +15,7 @@ namespace project2
         int m_commandPort;
         int m_updatePort;
         int m_infinity = 64;
-<<<<<<< HEAD
-=======
         UdpClient neighborClient;
->>>>>>> ErikBranch
 
         /// <summary>
         /// table to send packets to |Destination|Cost|NextHop|
