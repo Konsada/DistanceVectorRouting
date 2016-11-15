@@ -17,7 +17,8 @@ namespace project2
         int m_commandPort;
         int m_updatePort;
         int m_infinity = 64;
-        
+        UdpClient neighborClient;
+
         /// <summary>
         /// table to send packets to |Destination|Cost|NextHop|
         /// </summary>
@@ -116,7 +117,7 @@ namespace project2
         {
             IPHostEntry hostEntry = Dns.GetHostEntry(Host);
             IPAddress ipAddress = hostEntry.AddressList[1];
-            UdpClient neighborClient = new UdpClient(UpdatePort);
+            neighborClient = new UdpClient(UpdatePort);
             IPEndPoint sender = new IPEndPoint(IPAddress.Any, UpdatePort);
             EndPoint neighborRouter = (EndPoint)sender;
 
@@ -241,7 +242,24 @@ namespace project2
 
         private void SendUMessage()
         {
-            throw new NotImplementedException();
+            byte[] buffer = new byte[1024];
+            StringBuilder sb = new StringBuilder("");
+            string completedMessage;
+
+            sb.Append("U");
+            foreach (KeyValuePair<string, Tuple<int, string>> entry in m_RoutingTable)
+            {
+                sb.Append(" " + entry.Key);
+                sb.Append(" " + entry.Value.Item1.ToString());
+            }
+            completedMessage = sb.ToString().Trim();
+            buffer = Encoding.ASCII.GetBytes(completedMessage);
+
+            foreach (KeyValuePair<string, Tuple<int, int>> neighbor in m_Neighbors)
+            {
+                neighborClient.Send(buffer, buffer.Length, "localhost", neighbor.Value.Item2);
+            }
+
         }
 
         private string ExtractRouterName(EndPoint neighborRouter)
