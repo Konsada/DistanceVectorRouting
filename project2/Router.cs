@@ -139,6 +139,7 @@ namespace project2
 
                     if (watch.Elapsed.Seconds >= 10)
                     {
+                        Console.WriteLine(Name.ToString() + " - " + (watch.ElapsedMilliseconds / 1000).ToString());
                         SendUMessage();
                         watch.Restart();
                     }
