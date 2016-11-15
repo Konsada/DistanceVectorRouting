@@ -130,10 +130,7 @@ namespace project2
                         if (read > 0)
                         {
                             string msg = Encoding.ASCII.GetString(bytes, 0, read);
-<<<<<<< HEAD
                             ProcessMessage(msg, neighborRouter);
-=======
->>>>>>> 4d9c259f3b4aa81e519944595791c4a619ef8782
                         }
                     }
 
@@ -184,7 +181,6 @@ namespace project2
                 m_RoutingTable[parts[1]] = new Tuple<int, string>((m_Neighbors[parts[1]].Item1 - int.Parse(parts[2])) + m_RoutingTable[parts[1]].Item1,
                     m_RoutingTable[parts[1]].Item2);
                 m_Neighbors[parts[1]] = new Tuple<int, int>(int.Parse(parts[2]), m_Neighbors[parts[1]].Item2);
-
             }
         }
         /// <summary>
