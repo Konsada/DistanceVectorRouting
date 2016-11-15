@@ -104,6 +104,9 @@ namespace project2
             // listen for incoming connections.
             try
             {
+                System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+                watch.Start();
+
                 while (true)
                 {
                     ArrayList listenList = new ArrayList();
@@ -118,7 +121,7 @@ namespace project2
 
                     listenList.Add(Update);
                     listenList.Add(Command);
-                    Socket.Select(listenList, null, null, -1);
+                    Socket.Select(listenList, null, null, 10 - watch.Elapsed.Seconds);
 
                     int read = 0;
                     for (int i = 0; i < listenList.Count; i++)
@@ -127,8 +130,17 @@ namespace project2
                         if (read > 0)
                         {
                             string msg = Encoding.ASCII.GetString(bytes, 0, read);
+<<<<<<< HEAD
                             ProcessMessage(msg, neighborRouter);
+=======
+>>>>>>> 4d9c259f3b4aa81e519944595791c4a619ef8782
                         }
+                    }
+
+                    if (watch.Elapsed.Seconds >= 10)
+                    {
+                        SendUMessage();
+                        watch.Restart();
                     }
 
                     ShutdownSockets();
