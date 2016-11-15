@@ -137,7 +137,7 @@ namespace project2
                     ArrayList listenList = new ArrayList();
                     ArrayList acceptList = new ArrayList();
 
-                    // Start listening for connections.
+                    // bind sockets to ports.
                     updatePort = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                     updatePort.Bind(new IPEndPoint(ipAddress, UpdatePort));
 
@@ -158,7 +158,6 @@ namespace project2
                             if (RouterChange(msg))
                             {
                                 ProcessMessage(msg, neighborRouter);
-                                UpdateForwardTable();
                             }
                         }
                     }
@@ -201,9 +200,13 @@ namespace project2
             // if link cost changed, then change the dictionary value
             if (m_Neighbors[parts[1]].Item1 != int.Parse(parts[2]))
             {
-                m_Neighbors[parts[1]] = new Tuple<int, int>(int.Parse(parts[2]), m_Neighbors[parts[1]].Item2);
-            }
 
+                // change routertable entry by difference then send update
+                m_RoutingTable[parts[1]] = new Tuple<int, string>((m_Neighbors[parts[1]].Item1 - int.Parse(parts[2])) + m_RoutingTable[parts[1]].Item1, 
+                    m_RoutingTable[parts[1]].Item2);
+                m_Neighbors[parts[1]] = new Tuple<int, int>(int.Parse(parts[2]), m_Neighbors[parts[1]].Item2);
+
+            }
         }
         /// <summary>
         /// Check if update recv'd has an improved efficiency to route to
@@ -212,24 +215,46 @@ namespace project2
         /// <param name="neighborRouter">router that sent the message</param>
         private void UpdateTable(string[] parts, EndPoint neighborRouter)
         {
+            // get name of the neighbor router that sent the update
+            string neighbor = ExtractRouterName(neighborRouter);
+            int costToNeighbor = m_Neighbors[neighbor].Item1;
+            bool routingTableUpdated = false;
+            // compare cost to routingTable, parts contains command character 'U', hence why i starts at 1
             for (int i = 1; i < parts.Length; i++)
             {
-                string neighbor = ExtractRouterName(neighborRouter);
-                
+                string dest = parts[i]; i++;
+                int destCost = int.Parse(parts[i]);
+                int costToDest = m_RoutingTable[dest].Item1;
+
+                // check if update is more efficient
+                if((costToNeighbor + destCost) < costToDest)
+                {
+                    m_RoutingTable.Remove(dest);
+                    m_RoutingTable.Add(dest, new Tuple<int, string>(costToNeighbor + destCost, neighbor));
+                    routingTableUpdated = true;
+                }
             }
+            if (routingTableUpdated)
+                // send advertisement
+                SendUMessage();
+        }
+
+        private void SendUMessage()
+        {
+            throw new NotImplementedException();
         }
 
         private string ExtractRouterName(EndPoint neighborRouter)
         {
 
             for (int i = 0; i < m_Neighbors.Count; i++)
-
             {
                 if (m_Neighbors.ElementAt(i).Value.Item2 == ((IPEndPoint)neighborRouter).Port)
                 {
                     return m_Neighbors.ElementAt(i).Key;
                 }
             }
+
             throw new Exception("No linked router with that port");
         }
 
@@ -242,11 +267,6 @@ namespace project2
                 string[] parts = line.Split(' ');
                 m_Neighbors[parts[0]] = new Tuple<int, int>(int.Parse(parts[1]), m_Neighbors[parts[0]].Item2);
             }
-        }
-
-        private void UpdateForwardTable()
-        {
-            throw new NotImplementedException();
         }
 
         private bool RouterChange(string message)
