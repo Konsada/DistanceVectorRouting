@@ -105,6 +105,9 @@ namespace project2
             // listen for incoming connections.
             try
             {
+                System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+                watch.Start();
+
                 while (true)
                 {
                     ArrayList listenList = new ArrayList();
@@ -119,7 +122,7 @@ namespace project2
 
                     listenList.Add(Update);
                     listenList.Add(Command);
-                    Socket.Select(listenList, null, null, -1);
+                    Socket.Select(listenList, null, null, 10 - watch.Elapsed.Seconds);
 
                     int read = 0;
                     for (int i = 0; i < listenList.Count; i++)
@@ -128,11 +131,13 @@ namespace project2
                         if (read > 0)
                         {
                             string msg = Encoding.ASCII.GetString(bytes, 0, read);
-                            if (RouterChange(msg))
-                            {
-                                ProcessMessage(msg, neighborRouter);
-                            }
                         }
+                    }
+
+                    if (watch.Elapsed.Seconds >= 10)
+                    {
+                        SendUMessage();
+                        watch.Restart();
                     }
 
                     ShutdownSockets();
@@ -254,11 +259,6 @@ namespace project2
                 string[] parts = line.Split(' ');
                 m_Neighbors[parts[0]] = new Tuple<int, int>(int.Parse(parts[1]), m_Neighbors[parts[0]].Item2);
             }
-        }
-
-        private bool RouterChange(string message)
-        {
-            throw new NotImplementedException();
         }
 
         public void ShutdownSockets()
