@@ -17,11 +17,17 @@ namespace project2
         int m_commandPort;
         int m_updatePort;
         int m_infinity = 64;
-        // table to send packets to |Destination|Cost|NextHop|
-        public Dictionary<string, Tuple<int, string>> m_RoutingTable = new Dictionary<string, Tuple<int, string>>();
-        // Dictionary that keeps track of its neighbors names and update port # <name,<cost, updatePort>>
-        public Dictionary<string, Tuple<int, int>> m_Neighbors = new Dictionary<string, Tuple<int,int>>();
         
+        /// <summary>
+        /// table to send packets to |Destination|Cost|NextHop|
+        /// </summary>
+        public Dictionary<string, Tuple<int, string>> m_RoutingTable = new Dictionary<string, Tuple<int, string>>();
+
+        /// <summary>
+        /// Dictionary that keeps track of its neighbors names and update port # <name,<cost, updatePort>>
+        /// </summary>
+        public Dictionary<string, Tuple<int, int>> m_Neighbors = new Dictionary<string, Tuple<int, int>>();
+
         #region
         /// <summary>
         /// Creates a router object.
@@ -151,7 +157,7 @@ namespace project2
                             string msg = Encoding.ASCII.GetString(bytes, 0, read);
                             if (RouterChange(msg))
                             {
-                                ProcessMessage(msg);
+                                ProcessMessage(msg, neighborRouter);
                                 UpdateForwardTable();
                             }
                         }
@@ -170,13 +176,13 @@ namespace project2
             }
         }
 
-        private void ProcessMessage(string msg)
+        private void ProcessMessage(string msg, EndPoint neighborRouter)
         {
             string[] parts = msg.Split(' ');
             switch (parts[0])
             {
                 case "U":
-                    UpdateRouter(parts);
+                    UpdateTable(parts, neighborRouter);
                     break;
                 case "L":
                     LinkCost(parts);
@@ -194,12 +200,34 @@ namespace project2
             {
                 m_Neighbors[parts[1]] = new Tuple<int, int>(int.Parse(parts[2]), m_Neighbors[parts[1]].Item2);
             }
+
+        }
+        /// <summary>
+        /// Check if update recv'd has an improved efficiency to route to
+        /// </summary>
+        /// <param name="parts">array of messages sent split by ' '</param>
+        /// <param name="neighborRouter">router that sent the message</param>
+        private void UpdateTable(string[] parts, EndPoint neighborRouter)
+        {
+            for (int i = 1; i < parts.Length; i++)
+            {
+                string neighbor = ExtractRouterName(neighborRouter);
                 
+            }
         }
 
-        private void UpdateRouter(string[] parts)
+        private string ExtractRouterName(EndPoint neighborRouter)
         {
-            throw new NotImplementedException();
+
+            for (int i = 0; i < m_Neighbors.Count; i++)
+
+            {
+                if (m_Neighbors.ElementAt(i).Value.Item2 == ((IPEndPoint)neighborRouter).Port)
+                {
+                    return m_Neighbors.ElementAt(i).Key;
+                }
+            }
+            throw new Exception("No linked router with that port");
         }
 
         private void ReadConfig()
