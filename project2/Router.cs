@@ -11,10 +11,9 @@ namespace project2
 {
     public class Router
     {
-        UdpClient m_sender;
-        int m_commandPort;
-        int m_updatePort;
-        int m_infinity = 64;
+        /// <summary>
+        /// Village Bicycle of UdpClients, everyone gets to use it
+        /// </summary>
         UdpClient neighborClient;
 
         /// <summary>
@@ -82,7 +81,7 @@ namespace project2
         string Host { get; set; }
         public string Directory { get; set; }
         public int CommandPort { get; set; }
-        public int UpdatePort {get; set;}
+        public int UpdatePort { get; set; }
         public bool Poisoned { get; set; }
         Socket Update { get; set; }
         Socket Command { get; set; }
@@ -128,10 +127,7 @@ namespace project2
                         if (read > 0)
                         {
                             string msg = Encoding.ASCII.GetString(bytes, 0, read);
-                            if (RouterChange(msg))
-                            {
-                                ProcessMessage(msg, neighborRouter);
-                            }
+                            ProcessMessage(msg, neighborRouter);
                         }
                     }
 
@@ -194,6 +190,8 @@ namespace project2
             {
                 string dest = parts[i]; i++;
                 int destCost = int.Parse(parts[i]);
+                if (string.Compare(dest, Name) == 0)
+                    dest = neighbor;
                 int costToDest = m_RoutingTable[dest].Item1;
 
                 // check if update is more efficient
@@ -253,12 +251,8 @@ namespace project2
             {
                 string[] parts = line.Split(' ');
                 m_Neighbors[parts[0]] = new Tuple<int, int>(int.Parse(parts[1]), m_Neighbors[parts[0]].Item2);
+                m_RoutingTable[parts[0]] = new Tuple<int, string>(int.Parse(parts[1]), parts[0]);
             }
-        }
-
-        private bool RouterChange(string message)
-        {
-            throw new NotImplementedException();
         }
 
         public void ShutdownSockets()

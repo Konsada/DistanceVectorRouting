@@ -61,6 +61,7 @@ namespace project2
                 else
                 {
                     router.m_Neighbors.Add(parts[0], new Tuple<int, int>(64, int.Parse(parts[3])));
+                    router.m_RoutingTable.Add(parts[0], new Tuple<int, string>(64, null));
                 }
             }
         }
