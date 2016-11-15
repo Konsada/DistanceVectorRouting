@@ -12,12 +12,10 @@ namespace project2
     public class Router
     {
         UdpClient m_sender;
-        Socket m_update;
-        Socket m_command;
         int m_commandPort;
         int m_updatePort;
         int m_infinity = 64;
-        
+
         /// <summary>
         /// table to send packets to |Destination|Cost|NextHop|
         /// </summary>
@@ -41,76 +39,52 @@ namespace project2
         {
             Name = name;
             Host = host;
-            m_commandPort = cPort;
-            m_updatePort = uPort;
             CommandPort = cPort;
             UpdatePort = uPort;
             Poisoned = poison;
-
-            m_update = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            m_command = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            m_update.Bind(new IPEndPoint(Dns.GetHostAddresses(host)[1], uPort));
-            m_command.Bind(new IPEndPoint(Dns.GetHostAddresses(host)[1], cPort));
         }
-        /// <summary>
-        /// Creates a router object.
-        /// </summary>
-        /// <param name="name"> Router name </param>
-        /// <param name="host"> Host IP </param>
-        /// <param name="cPort"> Command Port Number </param>
-        /// <param name="uPort"> Update Port Number </param>
-        /// <param name="poison"> Set for Poisoned Reverse </param>
-        public Router(string name, IPEndPoint host, int cPort, int uPort, bool poison)
-        {
-            Name = name;
-            Host = host.Address.ToString();
-            m_commandPort = cPort;
-            m_updatePort = uPort;
-            CommandPort = cPort;
-            UpdatePort = uPort;
-            Poisoned = poison;
-            if (uPort == 0)
-                m_update = null;
-            else
-            {
-                m_update = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                m_update.Bind(host);
+        ///// <summary>
+        ///// Creates a router object.
+        ///// </summary>
+        ///// <param name="name"> Router name </param>
+        ///// <param name="host"> Host IP </param>
+        ///// <param name="cPort"> Command Port Number </param>
+        ///// <param name="uPort"> Update Port Number </param>
+        ///// <param name="poison"> Set for Poisoned Reverse </param>
+        //public Router(string name, IPEndPoint host, int cPort, int uPort, bool poison)
+        //{
+        //    Name = name;
+        //    Host = host.Address.ToString();
+        //    m_commandPort = cPort;
+        //    m_updatePort = uPort;
+        //    CommandPort = cPort;
+        //    UpdatePort = uPort;
+        //    Poisoned = poison;
+        //    if (uPort == 0)
+        //        m_update = null;
+        //    else
+        //    {
+        //        m_update = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+        //        m_update.Bind(host);
 
-            }
-            if (cPort == 0)
-                m_command = null;
-            else
-            {
-                m_command = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                m_command.Bind(host);
-            }
-        }
+        //    }
+        //    if (cPort == 0)
+        //        m_command = null;
+        //    else
+        //    {
+        //        m_command = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+        //        m_command.Bind(host);
+        //    }
+        //}
+
         public string Name { get; private set; }
         string Host { get; set; }
         public string Directory { get; set; }
-        public int CommandPort
-        {
-            get
-            {
-                return m_commandPort;
-            }
-            set
-            {
-                m_command.Bind(new IPEndPoint(Dns.GetHostAddresses(Host)[1], value));
-            }
-        }
-        public int UpdatePort
-        {
-            get
-            {
-                return m_updatePort;
-            }
-            set
-            {
-                m_update.Bind(new IPEndPoint(Dns.GetHostAddresses(Host)[1], value));
-            }
-        }
+        public int CommandPort { get; set; }
+        public int UpdatePort {get; set;}
         public bool Poisoned { get; set; }
+        Socket Update { get; set; }
+        Socket Command { get; set; }
         #endregion
         public void Start()
         {
@@ -132,20 +106,18 @@ namespace project2
             {
                 while (true)
                 {
-                    Socket updatePort = null;
-                    Socket commandPort = null;
                     ArrayList listenList = new ArrayList();
                     ArrayList acceptList = new ArrayList();
 
                     // bind sockets to ports.
-                    updatePort = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                    updatePort.Bind(new IPEndPoint(ipAddress, UpdatePort));
+                    Update = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                    Update.Bind(new IPEndPoint(ipAddress, UpdatePort));
 
-                    commandPort = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                    commandPort.Bind(new IPEndPoint(ipAddress, CommandPort));
+                    Command = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                    Command.Bind(new IPEndPoint(ipAddress, CommandPort));
 
-                    listenList.Add(updatePort);
-                    listenList.Add(commandPort);
+                    listenList.Add(Update);
+                    listenList.Add(Command);
                     Socket.Select(listenList, null, null, -1);
 
                     int read = 0;
@@ -162,10 +134,7 @@ namespace project2
                         }
                     }
 
-                    updatePort.Shutdown(SocketShutdown.Both);
-                    updatePort.Close();
-                    commandPort.Shutdown(SocketShutdown.Both);
-                    commandPort.Close();
+                    ShutdownSockets();
                 }
             }
             catch (Exception e)
@@ -202,7 +171,7 @@ namespace project2
             {
 
                 // change routertable entry by difference then send update
-                m_RoutingTable[parts[1]] = new Tuple<int, string>((m_Neighbors[parts[1]].Item1 - int.Parse(parts[2])) + m_RoutingTable[parts[1]].Item1, 
+                m_RoutingTable[parts[1]] = new Tuple<int, string>((m_Neighbors[parts[1]].Item1 - int.Parse(parts[2])) + m_RoutingTable[parts[1]].Item1,
                     m_RoutingTable[parts[1]].Item2);
                 m_Neighbors[parts[1]] = new Tuple<int, int>(int.Parse(parts[2]), m_Neighbors[parts[1]].Item2);
 
@@ -227,7 +196,7 @@ namespace project2
                 int costToDest = m_RoutingTable[dest].Item1;
 
                 // check if update is more efficient
-                if((costToNeighbor + destCost) < costToDest)
+                if ((costToNeighbor + destCost) < costToDest)
                 {
                     m_RoutingTable.Remove(dest);
                     m_RoutingTable.Add(dest, new Tuple<int, string>(costToNeighbor + destCost, neighbor));
@@ -274,12 +243,12 @@ namespace project2
             throw new NotImplementedException();
         }
 
-        public void Shutdown()
+        public void ShutdownSockets()
         {
-            m_update.Shutdown(SocketShutdown.Both);
-            m_command.Shutdown(SocketShutdown.Both);
-            m_update.Close();
-            m_command.Close();
+            Update.Shutdown(SocketShutdown.Both);
+            Command.Shutdown(SocketShutdown.Both);
+            Update.Close();
+            Command.Close();
         }
 
         private void HandlePMessage(string[] pieces)

@@ -51,6 +51,7 @@ namespace project2
             foreach (string line in lines)
             {
                 parts = line.Split(' ');
+                if (string.Compare(parts[0], "#") == 0) continue;
                 if (string.Compare(parts[0], router.Name) == 0)
                 {
                     router.CommandPort = int.Parse(parts[m_commandPartIndex]);
