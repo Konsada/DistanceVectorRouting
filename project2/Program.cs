@@ -29,16 +29,16 @@ namespace project2
             string dir, routerName;
             bool poisonReverse = false;
 
-            if (args[1].Contains("-p"))
+            if (args[0].Contains("-p"))
             {
                 poisonReverse = true;
-                dir = args[2];
-                routerName = args[3];
+                dir = args[1];
+                routerName = args[2];
             }
             else
             {
-                dir = args[1];
-                routerName = args[2];
+                dir = args[0];
+                routerName = args[1];
             }
 
             Router router = new Router(routerName, "localhost", 0, 0, poisonReverse);
