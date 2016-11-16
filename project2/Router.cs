@@ -242,7 +242,17 @@ namespace project2
             foreach (KeyValuePair<string, Tuple<int, string>> entry in m_RoutingTable)
             {
                 sb.Append(" " + entry.Key);
-                sb.Append(" " + entry.Value.Item1.ToString());
+                if(Poisoned && m_Neighbors[entry.Key].Item1 < 64)
+                {
+                    if(m_RoutingTable[entry.Key].Item2 != entry.Key)
+                    {
+                        sb.Append(" " + 64);
+                    }
+                }
+                else
+                {
+                    sb.Append(" " + entry.Value.Item1.ToString());
+                }
             }
             completedMessage = sb.ToString().Trim();
             buffer = Encoding.ASCII.GetBytes(completedMessage);
