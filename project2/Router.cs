@@ -20,7 +20,6 @@ namespace project2
         /// Village Bicycle of UdpClients, everyone gets to use it
         /// </summary>
         UdpClient neighborClient;
-
         /// <summary>
         /// table to send packets to |Destination|Cost|NextHop|
         /// </summary>
@@ -104,6 +103,7 @@ namespace project2
 
             // read file
             ReadConfig();
+            WriteToFile("Starting: " + Directory);
             SendUMessage();
 
             // Bind the socket to the local endpoint and 
@@ -142,7 +142,7 @@ namespace project2
 
                     if (watch.Elapsed.Seconds >= 10)
                     {
-                        Console.WriteLine(Name.ToString() + " - " + (watch.ElapsedMilliseconds / 1000).ToString());
+                        Write((watch.ElapsedMilliseconds / 1000.00));
                         SendUMessage();
                         watch.Restart();
                     }
@@ -191,7 +191,8 @@ namespace project2
                 //m_RoutingTable[link] = new Tuple<int, string>(int.Parse(parts[2]), m_RoutingTable[link].Item2);
                 m_RoutingTable[link] = new Tuple<int, string>(int.Parse(parts[2]), link);
                 m_Neighbors[link] = new Tuple<int, int>(int.Parse(parts[2]), m_Neighbors[link].Item2);
-                Console.WriteLine(Name + " - dest: " + link + " cost: " + m_RoutingTable[link].Item1 + " nexthop: " + link);
+
+                Write(link, m_RoutingTable[link].Item1, link);
                 SendUMessage();
             }
         }
@@ -222,7 +223,8 @@ namespace project2
                     m_RoutingTable.Add(dest, new Tuple<int, string>(costToNeighbor + destCost, neighbor));
                     routingTableUpdated = true;
                 }
-               Console.WriteLine(Name + " - dest: " + dest + " cost: " + (m_RoutingTable[dest].Item1).ToString() + " nexthop: " + m_RoutingTable[dest].Item2);
+               //Console.WriteLine(Name + " - dest: " + dest + " cost: " + (m_RoutingTable[dest].Item1).ToString() + " nexthop: " + m_RoutingTable[dest].Item2);
+                Write(dest, m_RoutingTable[dest].Item1, m_RoutingTable[dest].Item2);
             }
             if (routingTableUpdated)
                 // send advertisement
@@ -235,11 +237,22 @@ namespace project2
             StringBuilder sb = new StringBuilder("");
             string completedMessage;
 
+            // Assemble update message
             sb.Append("U");
             foreach (KeyValuePair<string, Tuple<int, string>> entry in m_RoutingTable)
             {
                 sb.Append(" " + entry.Key);
-                sb.Append(" " + entry.Value.Item1.ToString());
+                if(Poisoned && m_Neighbors[entry.Key].Item1 < 64)
+                {
+                    if(m_RoutingTable[entry.Key].Item2 != entry.Key)
+                    {
+                        sb.Append(" " + 64);
+                    }
+                }
+                else
+                {
+                    sb.Append(" " + entry.Value.Item1.ToString());
+                }
             }
             completedMessage = sb.ToString().Trim();
             buffer = Encoding.ASCII.GetBytes(completedMessage);
@@ -294,7 +307,8 @@ namespace project2
                 Console.WriteLine("Now printing routing table!");
                 foreach (KeyValuePair<string, Tuple<int, string>> entry in m_RoutingTable)
                 {
-                    Console.WriteLine(Name + " - dest: " + entry.Key + " cost: " + entry.Value.Item1.ToString() + " nexthop: " + entry.Value.Item2);
+                    //Console.WriteLine(Name + " - dest: " + entry.Key + " cost: " + entry.Value.Item1.ToString() + " nexthop: " + entry.Value.Item2);
+                    Write(entry.Key, entry.Value.Item1, entry.Value.Item2);
                 }
             }
             else
@@ -311,6 +325,23 @@ namespace project2
                 {
                     Console.WriteLine(pieces[0] + " was not found in the current routing table");
                 }
+            }
+        }
+        private void Write(double time)
+        {
+            Console.WriteLine(Name + " - " + time);
+            WriteToFile(Name + " - " + time);
+        }
+        private void Write(string dest, int cost, string nexthop)
+        {
+            Console.WriteLine(Name + " - dest: " + dest + " cost: " + cost + " nexthop: " + nexthop);
+            WriteToFile(Name + " - dest: " + dest + " cost: " + cost + " nexthop: " + nexthop);
+        }
+        private void WriteToFile(string message)
+        {
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter("./output/OUTPUT" + Name + ".txt", true))
+            {
+                file.WriteLine(message);
             }
         }
     }
