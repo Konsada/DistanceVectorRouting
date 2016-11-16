@@ -237,6 +237,7 @@ namespace project2
             StringBuilder sb = new StringBuilder("");
             string completedMessage;
 
+            // Assemble update message
             sb.Append("U");
             foreach (KeyValuePair<string, Tuple<int, string>> entry in m_RoutingTable)
             {
@@ -328,10 +329,10 @@ namespace project2
         }
         private void WriteToFile(string message)
         {
-            //using (System.IO.StreamWriter file = new System.IO.StreamWriter("./OUTPUT.txt", true))
-            //{
-            //    file.WriteLine(message);
-            //}
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter("./output/OUTPUT" + Name + ".txt", true))
+            {
+                file.WriteLine(message);
+            }
         }
     }
 }
