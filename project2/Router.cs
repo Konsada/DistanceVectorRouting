@@ -104,6 +104,7 @@ namespace project2
 
             // read file
             ReadConfig();
+            SendUMessage();
 
             // Bind the socket to the local endpoint and 
             // listen for incoming connections.
