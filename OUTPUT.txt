@@ -1,0 +1,7 @@
+A - 10
+A - 10
+A - dest: B cost: 7 nexthop: B
+A - dest: C cost: 8 nexthop: B
+A - dest: E cost: 1 nexthop: E
+A - dest: D cost: 64 nexthop: 
+^C

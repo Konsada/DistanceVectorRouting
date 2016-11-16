@@ -181,7 +181,7 @@ namespace project2
         {
 
             string link = parts[1];
-    
+
             // if link cost changed, then change the dictionary value
             if (m_Neighbors[link].Item1 != int.Parse(parts[2]))
             {
@@ -223,16 +223,59 @@ namespace project2
                     m_RoutingTable.Add(dest, new Tuple<int, string>(costToNeighbor + destCost, neighbor));
                     routingTableUpdated = true;
                 }
+<<<<<<< HEAD
+                //Console.WriteLine(Name + " - dest: " + dest + " cost: " + (m_RoutingTable[dest].Item1).ToString() + " nexthop: " + m_RoutingTable[dest].Item2);
+=======
                //Console.WriteLine(Name + " - dest: " + dest + " cost: " + (m_RoutingTable[dest].Item1).ToString() + " nexthop: " + m_RoutingTable[dest].Item2);
+>>>>>>> 4504788293967235566a3e636de2b25a2ae02fe2
                 Write(dest, m_RoutingTable[dest].Item1, m_RoutingTable[dest].Item2);
             }
             if (routingTableUpdated)
                 // send advertisement
                 SendUMessage();
         }
-
+        private void SendPoisonUMessage()
+        {
+            byte[] buffer = new byte[1024];
+            Dictionary<string, string> lines = new Dictionary<string, string>();
+            foreach(KeyValuePair<string, Tuple<int, string>> router in m_RoutingTable)
+            {
+                StringBuilder sb = new StringBuilder("U");
+                foreach (KeyValuePair<string, Tuple<int, string>> entry in m_RoutingTable)
+                {
+                    sb.Append(" " + entry.Key);
+                    if (Poisoned && m_Neighbors[entry.Key].Item1 < 64)
+                    {
+                        if (m_RoutingTable[entry.Key].Item2 != entry.Key)
+                        {
+                            //lie!
+                            sb.Append(" " + 64);
+                        }
+                    }
+                    else
+                    {
+                        sb.Append(" " + entry.Value.Item1);
+                    }
+                }
+                lines.Add(router.Key, sb.ToString().Trim());
+            }
+            foreach (KeyValuePair<string, Tuple<int, int>> neighbor in m_Neighbors)
+            {
+                if (neighbor.Value.Item1 < 64)
+                {
+                    buffer = Encoding.ASCII.GetBytes(lines[neighbor.Key]);
+                    neighborClient.Send(buffer, buffer.Length, "localhost", neighbor.Value.Item2);
+                }
+            }
+        }
         private void SendUMessage()
         {
+            if (Poisoned)
+            {
+                SendPoisonUMessage();
+                return;
+            }
+
             byte[] buffer = new byte[1024];
             StringBuilder sb = new StringBuilder("");
             string completedMessage;
