@@ -1,0 +1,6 @@
+# router host command-port update-port
+A localhost 20000 20001
+C localhost 20010 20011
+B localhost 20020 20021
+E localhost 20030 20031
+D localhost 20040 20041

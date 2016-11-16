@@ -1,0 +1,46 @@
+#!/usr/bin/python
+# Takes as input:
+#    List of edges: end1 end2 cost
+# Produces as output:
+#    a file for each router, endi.cfg, and a file
+#    routers containing routername hostname commandport updateport
+import string
+
+def addedge(routers, left, right, cost):
+    if left not in routers.keys():
+        routers[left] = {}
+    if right not in routers.keys():
+        routers[right] = {}
+    routers[left][right] = cost
+    routers[right][left] = cost
+
+def genFiles(test):
+    f = open(test+'/net.cfg')
+    lines = f.readlines()
+    f.close()
+    routers = {}
+    for line in lines:
+        if line[0]=='#': continue
+        words = string.split(line)
+        if len(words)<3: continue
+        addedge(routers, words[1], words[0], int(words[2]))
+    print routers
+    for router in routers.keys():
+        f = open(test+ '/' + router + '.cfg', "w")
+        r = routers[router]
+        for dest in r.keys():
+            line = '%s %d\n' % (dest, r[dest])
+            f.write(line)
+        f.close()
+    f = open(test+'/routers', "w")
+    f.write('# router host command-port update-port\n')
+    port = 20000
+    for router in routers.keys():
+        line = '%s localhost %d %d\n' % (router, port, port+1)
+        f.write(line)
+        port = port + 10
+    f.close()
+
+if __name__ == '__main__':
+    import sys
+    genFiles(sys.argv[1])
