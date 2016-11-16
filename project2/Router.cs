@@ -234,19 +234,16 @@ namespace project2
         {
             byte[] buffer = new byte[1024];
             Dictionary<string, string> lines = new Dictionary<string, string>();
-            foreach(KeyValuePair<string, Tuple<int, string>> router in m_RoutingTable)
+            foreach (KeyValuePair<string, Tuple<int, string>> router in m_RoutingTable)
             {
                 StringBuilder sb = new StringBuilder("U");
                 foreach (KeyValuePair<string, Tuple<int, string>> entry in m_RoutingTable)
                 {
                     sb.Append(" " + entry.Key);
-                    if (Poisoned && m_Neighbors[entry.Key].Item1 < 64)
+                    if (Poisoned && m_Neighbors[entry.Key].Item1 < 64 && m_RoutingTable[entry.Key].Item2 != entry.Key)
                     {
-                        if (m_RoutingTable[entry.Key].Item2 != entry.Key)
-                        {
-                            //lie!
-                            sb.Append(" " + 64);
-                        }
+                        //lie!
+                        sb.Append(" 64");
                     }
                     else
                     {
@@ -281,9 +278,9 @@ namespace project2
             foreach (KeyValuePair<string, Tuple<int, string>> entry in m_RoutingTable)
             {
                 sb.Append(" " + entry.Key);
-                if(Poisoned && m_Neighbors[entry.Key].Item1 < 64)
+                if (Poisoned && m_Neighbors[entry.Key].Item1 < 64)
                 {
-                    if(m_RoutingTable[entry.Key].Item2 != entry.Key)
+                    if (m_RoutingTable[entry.Key].Item2 != entry.Key)
                     {
                         sb.Append(" " + 64);
                     }
