@@ -179,16 +179,20 @@ namespace project2
 
         private void LinkCost(string[] parts)
         {
+
+            string link = parts[1];
+    
             // if link cost changed, then change the dictionary value
-            if (m_Neighbors[parts[1]].Item1 != int.Parse(parts[2]))
+            if (m_Neighbors[link].Item1 != int.Parse(parts[2]))
             {
-
+                Console.WriteLine("Recieved the following message:");
+                Console.WriteLine(parts[0] + " " + parts[1] + " " + parts[2].ToString());
                 // change routertable entry by difference then send update
-                m_RoutingTable[parts[1]] = new Tuple<int, string>((m_Neighbors[parts[1]].Item1 - int.Parse(parts[2])) + m_RoutingTable[parts[1]].Item1,
-                    m_RoutingTable[parts[1]].Item2);
-                m_Neighbors[parts[1]] = new Tuple<int, int>(int.Parse(parts[2]), m_Neighbors[parts[1]].Item2);
-                Console.WriteLine(Name + " - dest: " + parts[0] + " cost: " + parts[1] + " nexthop: " + parts[0]);
-
+                //m_RoutingTable[link] = new Tuple<int, string>(int.Parse(parts[2]), m_RoutingTable[link].Item2);
+                m_RoutingTable[link] = new Tuple<int, string>(int.Parse(parts[2]), link);
+                m_Neighbors[link] = new Tuple<int, int>(int.Parse(parts[2]), m_Neighbors[link].Item2);
+                Console.WriteLine(Name + " - dest: " + link + " cost: " + m_RoutingTable[link].Item1 + " nexthop: " + link);
+                SendUMessage();
             }
         }
         /// <summary>
@@ -217,8 +221,8 @@ namespace project2
                     m_RoutingTable.Remove(dest);
                     m_RoutingTable.Add(dest, new Tuple<int, string>(costToNeighbor + destCost, neighbor));
                     routingTableUpdated = true;
-                    Console.WriteLine(Name + " - dest: " + dest + " cost: " + (costToNeighbor + destCost).ToString() + " nexthop: " + neighbor);
                 }
+               Console.WriteLine(Name + " - dest: " + dest + " cost: " + (m_RoutingTable[dest].Item1).ToString() + " nexthop: " + m_RoutingTable[dest].Item2);
             }
             if (routingTableUpdated)
                 // send advertisement
@@ -242,9 +246,11 @@ namespace project2
 
             foreach (KeyValuePair<string, Tuple<int, int>> neighbor in m_Neighbors)
             {
-                neighborClient.Send(buffer, buffer.Length, "localhost", neighbor.Value.Item2);
+                if (neighbor.Value.Item1 < 64)
+                {
+                    neighborClient.Send(buffer, buffer.Length, "localhost", neighbor.Value.Item2);
+                }
             }
-
         }
 
         private string ExtractRouterName(EndPoint neighborRouter)
@@ -285,19 +291,26 @@ namespace project2
         {
             if (pieces.Length < 2)
             {
-                Console.WriteLine("Not enough arguments were given");
-            }
-            if (m_RoutingTable.ContainsKey(pieces[1]))
-            {
-                Console.Write(pieces[0]);
-                Console.Write(" ");
-                Console.Write(m_RoutingTable[pieces[1]].Item1.ToString());
-                Console.Write(" ");
-                Console.WriteLine(m_RoutingTable[pieces[1]].Item2.ToString());
+                Console.WriteLine("Now printing routing table!");
+                foreach (KeyValuePair<string, Tuple<int, string>> entry in m_RoutingTable)
+                {
+                    Console.WriteLine(Name + " - dest: " + entry.Key + " cost: " + entry.Value.Item1.ToString() + " nexthop: " + entry.Value.Item2);
+                }
             }
             else
             {
-                Console.WriteLine(pieces[0] + " was not found in the current routing table");
+                if (m_RoutingTable.ContainsKey(pieces[1]))
+                {
+                    Console.Write(pieces[0]);
+                    Console.Write(" ");
+                    Console.Write(m_RoutingTable[pieces[1]].Item1.ToString());
+                    Console.Write(" ");
+                    Console.WriteLine(m_RoutingTable[pieces[1]].Item2.ToString());
+                }
+                else
+                {
+                    Console.WriteLine(pieces[0] + " was not found in the current routing table");
+                }
             }
         }
     }
