@@ -1,8 +1,4 @@
 C:\Users\keons_000\Documents\CS455\PROJECTS\project2\project2.exe.config
-<<<<<<< HEAD
-C:\Users\keons_000\Documents\CS455\PROJECTS\project2\project2\obj\Debug\project2.exe
-C:\Users\keons_000\Documents\CS455\PROJECTS\project2\project2\obj\Debug\project2.pdb
-=======
 C:\Users\keons_000\Documents\CS455\PROJECTS\project2\project2\obj\Debug\project2.csprojResolveAssemblyReference.cache
 C:\Users\keons_000\Documents\CS455\PROJECTS\project2\project2\obj\Debug\project2.exe.manifest
 C:\Users\keons_000\Documents\CS455\PROJECTS\project2\project2\obj\Debug\project2.application
@@ -10,4 +6,3 @@ C:\Users\keons_000\Documents\CS455\PROJECTS\project2\project2.exe.manifest
 C:\Users\keons_000\Documents\CS455\PROJECTS\project2\project2.application
 C:\Users\keons_000\Documents\CS455\PROJECTS\project2\project2.exe
 C:\Users\keons_000\Documents\CS455\PROJECTS\project2\project2.pdb
->>>>>>> 4504788293967235566a3e636de2b25a2ae02fe2

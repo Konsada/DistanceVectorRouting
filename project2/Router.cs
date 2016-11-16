@@ -223,11 +223,7 @@ namespace project2
                     m_RoutingTable.Add(dest, new Tuple<int, string>(costToNeighbor + destCost, neighbor));
                     routingTableUpdated = true;
                 }
-<<<<<<< HEAD
-                //Console.WriteLine(Name + " - dest: " + dest + " cost: " + (m_RoutingTable[dest].Item1).ToString() + " nexthop: " + m_RoutingTable[dest].Item2);
-=======
-               //Console.WriteLine(Name + " - dest: " + dest + " cost: " + (m_RoutingTable[dest].Item1).ToString() + " nexthop: " + m_RoutingTable[dest].Item2);
->>>>>>> 4504788293967235566a3e636de2b25a2ae02fe2
+
                 Write(dest, m_RoutingTable[dest].Item1, m_RoutingTable[dest].Item2);
             }
             if (routingTableUpdated)
