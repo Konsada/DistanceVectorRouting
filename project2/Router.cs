@@ -20,7 +20,6 @@ namespace project2
         /// Village Bicycle of UdpClients, everyone gets to use it
         /// </summary>
         UdpClient neighborClient;
-
         /// <summary>
         /// table to send packets to |Destination|Cost|NextHop|
         /// </summary>
@@ -104,6 +103,7 @@ namespace project2
 
             // read file
             ReadConfig();
+            WriteToFile("Starting: " + Directory);
             SendUMessage();
 
             // Bind the socket to the local endpoint and 
@@ -319,11 +319,19 @@ namespace project2
         private void Write(double time)
         {
             Console.WriteLine(Name + " - " + time);
+            WriteToFile(Name + " - " + time);
         }
         private void Write(string dest, int cost, string nexthop)
         {
             Console.WriteLine(Name + " - dest: " + dest + " cost: " + cost + " nexthop: " + nexthop);
-
+            WriteToFile(Name + " - dest: " + dest + " cost: " + cost + " nexthop: " + nexthop);
+        }
+        private void WriteToFile(string message)
+        {
+            //using (System.IO.StreamWriter file = new System.IO.StreamWriter("./OUTPUT.txt", true))
+            //{
+            //    file.WriteLine(message);
+            //}
         }
     }
 }
